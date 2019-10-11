@@ -1,0 +1,124 @@
+---
+title: "ms_4"
+author: "Madeleine Snow"
+date: "10/11/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+library(tidyverse)
+library(rvest)
+library(rlist)
+library(stringi)
+library(htmltab)
+library(xml2)
+
+```
+
+```{r data, include=FALSE}
+
+url <- 'https://en.wikipedia.org/wiki/Tony_Award_for_Best_Musical'
+url <- read_html('https://en.wikipedia.org/wiki/Tony_Award_for_Best_Musical')
+
+bm40s <- url %>% 
+  html_node(xpath = '//*[@id="mw-content-text"]/div/table[2]') %>% 
+  html_table(fill = TRUE) %>% 
+  na.omit()
+
+bm40s$Winner <- c(1)
+bm40s$Women <- c(1)
+
+bm50s <- url %>% 
+  html_node(xpath = '//*[@id="mw-content-text"]/div/table[3]') %>% 
+  html_table(fill = TRUE) %>% 
+  na.omit()
+
+bm50s$Winner <- c(1,1,1,1,1,1,1,0,1,0,0,0,1,0,0,0,0,1,0,0)
+bm50s$Women <- c(0,0,0,1,0,0,0,0,0,1,1,0,0,0,0,0,0,1,0,0)
+
+bm60s <- url %>% 
+  html_node(xpath = '//*[@id="mw-content-text"]/div/table[4]') %>% 
+  html_table(fill = TRUE) %>% 
+  na.omit()
+
+bm60s$Winner <- c(1,1,0,0,0,1,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0)
+bm60s$Women <- c(0,0,0,1, #1960
+                 0,1,0,0, #1961
+                 0,1,0,0, #1962
+                 0,0,0,0, #1963
+                 0,1,0,0, #1964
+                 0,0,1,1, #1965
+                 0,0,0,1, #1966
+                 0,0,0,1, #1967
+                 1,0,1,0, #1968
+                 0,0,0,0) #1969
+
+bm70s <- url %>% 
+  html_node(xpath = '//*[@id="mw-content-text"]/div/table[5]') %>% 
+  html_table(fill = TRUE) %>% 
+  na.omit()
+
+bm70s$Winner <- c(1,0,0,1,0,0,1,0,0,0,1,0,0,0,1,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0)
+bm70s$Women <- c(1,0,0, #1970
+                 0,0,0, #1971
+                 0,0,0,0, #1972
+                 0,1,0,0, #1973
+                 1,0,1, #1974
+                 0,0,1,0, #1975
+                 0,0,0,0, #1976
+                 0,1,0,0, #1977
+                 0,0,1,1, #1978
+                 0,1,1,1) #1979
+
+bm80s <- url %>% 
+  html_node(xpath = '//*[@id="mw-content-text"]/div/table[6]') %>% 
+  html_table(fill = TRUE) %>% 
+  na.omit()
+
+bm80s$Winner <- c(1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0)
+bm80s$Women <- c(0,0,0,1, #1980
+                 0,0,0,0, #1981
+                 0,0,0,1, #1982
+                 0,0,0,0, #1983
+                 0,1,0,0, #1984
+                 0,1,1,1, #1985
+                 0,0,0,0, #1986
+                 0,0,0,0, #1987
+                 0,0,0,0, #1988
+                 0,0,0) #1989
+
+bm90s <- url %>% 
+  html_node(xpath = '//*[@id="mw-content-text"]/div/table[7]') %>% 
+  html_table(fill = TRUE) %>% 
+  na.omit()
+
+bm90s$Winner <- c(1,0,0,0,
+                  1,0,0,0, 
+                  1,0,0,0,
+                  1,0,0,0,
+                  1,0,0,0,
+                  1,0, #1995
+                  1,0,0,0,
+                  1,0,0,0,
+                  1,0,0,0,
+                  1,0,0,0)
+
+bm90s$Women <- c(0,0,0,0, #1990
+                 1,0,1,1, #1991
+                 0,0,0,1, #1992
+                 0,0,0,0, #1993
+                 0,0,1,0, #1994
+                 0,0, #1995
+                 0,1,1,0, #1996
+                 0,1,0,0, #1997
+                 1,0,1,1, #1998
+                 0,0,1,0) #1999
+
+bm_all <- rbind(bm40s, bm50s, bm60s, bm70s, bm80s, bm90s) %>% 
+  separate(Year, into = c('Year', 'Ceremony'), sep = 4) %>%
+  arrange(Year)
+
+
+```
