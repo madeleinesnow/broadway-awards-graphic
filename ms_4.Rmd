@@ -1,5 +1,5 @@
 ---
-title: "ms_4"
+title: "It's A Hit: Tony Award-Winning Broadway Shows"
 author: "Madeleine Snow"
 date: "10/11/2019"
 output: html_document
@@ -29,11 +29,14 @@ bm40s <- url %>%
 
 bm40s$Winner <- c(1)
 bm40s$Women <- c(1)
+bm40s$Decade <- c("1940s")
 
 bm50s <- url %>% 
   html_node(xpath = '//*[@id="mw-content-text"]/div/table[3]') %>% 
   html_table(fill = TRUE) %>% 
   na.omit()
+bm50s$Decade <- c("1950s")
+
 
 bm50s$Winner <- c(1,1,1,1,1,1,1,0,1,0,0,0,1,0,0,0,0,1,0,0)
 bm50s$Women <- c(0,0,0,1,0,0,0,0,0,1,1,0,0,0,0,0,0,1,0,0)
@@ -54,6 +57,7 @@ bm60s$Women <- c(0,0,0,1, #1960
                  0,0,0,1, #1967
                  1,0,1,0, #1968
                  0,0,0,0) #1969
+bm60s$Decade <- c("1960s")
 
 bm70s <- url %>% 
   html_node(xpath = '//*[@id="mw-content-text"]/div/table[5]') %>% 
@@ -71,6 +75,7 @@ bm70s$Women <- c(1,0,0, #1970
                  0,1,0,0, #1977
                  0,0,1,1, #1978
                  0,1,1,1) #1979
+bm70s$Decade <- c("1970s")
 
 bm80s <- url %>% 
   html_node(xpath = '//*[@id="mw-content-text"]/div/table[6]') %>% 
@@ -88,6 +93,7 @@ bm80s$Women <- c(0,0,0,1, #1980
                  0,0,0,0, #1987
                  0,0,0,0, #1988
                  0,0,0) #1989
+bm80s$Decade <- c("1980s")
 
 bm90s <- url %>% 
   html_node(xpath = '//*[@id="mw-content-text"]/div/table[7]') %>% 
@@ -115,10 +121,32 @@ bm90s$Women <- c(0,0,0,0, #1990
                  0,1,0,0, #1997
                  1,0,1,1, #1998
                  0,0,1,0) #1999
+bm90s$Decade <- c("1990s")
 
 bm_all <- rbind(bm40s, bm50s, bm60s, bm70s, bm80s, bm90s) %>% 
   separate(Year, into = c('Year', 'Ceremony'), sep = 4) %>%
   arrange(Year)
 
+```
+
+```{r plot, include=TRUE}
+
+bm_all$Winner[bm_all$Winner==0] <- "Nominee"
+bm_all$Winner[bm_all$Winner==1] <- "Winner"
+
+bm_all$Women[bm_all$Women==0] <- "No Female Writers"
+bm_all$Women[bm_all$Women==1] <- "At Least 1 Female Writer"
+
+
+data <- bm_all
+
+ggplot(data, aes(x = as.character(Winner), fill = as.factor(Women))) +
+  geom_bar(position = position_dodge(preserve = "single")) +
+  facet_wrap(. ~ Decade) +
+  labs(x = "Tony Award Nominees/Winners",
+       fill = "Writing Teams' Gender Composition",
+       title = "Gender of Broadway Writers",
+       subtitle = "Shows up for Tony Award for Best Musical, 1949-1999")
 
 ```
+
