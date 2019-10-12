@@ -10,14 +10,24 @@ knitr::opts_chunk$set(echo = FALSE)
 
 library(tidyverse)
 library(rvest)
-library(rlist)
-library(stringi)
-library(htmltab)
-library(xml2)
 
 ```
 
 ```{r data, include=FALSE}
+
+# I scraped the Wikipedia page for the Tony Award for Best Musical with rvest. I inspected the table elements, separated by decade, individually on the webpage and copied the XPath for each. I specified the url so that I could inspect the HTML structure. 
+
+# I wanted to return a data frame, so I piped in html_node() with the XPath for the first table, the 1940s, piping in another command to get a table output. After looking at the table, I wanted to get rid of rows filled with NA, so I used na.omit(). 
+
+# I repeated this process for all of the decades, but as I got to the 2000s and 2010s, I received errors reading in the code, so I need to revisit these decades for the most complete picture of the winners of and nominees for Best Musical.
+
+# I used rbind() to combine all of the tables for each decade into a single data frame. I noticed that year and awards ceremony number were in one column, so I used the separate function to make them into 2 columns.
+
+# Scraping the code in this way did not denote which shows actually won the awards, which are denoted through a blue-colored fill on Wikipedia. I manually created a column in each decade table with a dummy variable to distinguish winners versus nominees.
+
+# I was interested in looking at which shows had a female writer on the writing team as a book writer, lyricist, and/or composer. I created another dummy variable to denote which shows had at least one female writer versus no female writers.
+
+# I hope to scrape data similarly and create the same dummy variables from the Wikipedia page for the Tony Award for Best Play. I would like to create a for-loop or function that would simplify my code and therefore reduce possible errors.
 
 url <- 'https://en.wikipedia.org/wiki/Tony_Award_for_Best_Musical'
 url <- read_html('https://en.wikipedia.org/wiki/Tony_Award_for_Best_Musical')
@@ -129,7 +139,19 @@ bm_all <- rbind(bm40s, bm50s, bm60s, bm70s, bm80s, bm90s) %>%
 
 ```
 
-```{r plot, include=TRUE}
+```{r graphic, include=TRUE}
+
+# For my graphic, I wanted the dummy variables for nominee vs winner and 0 vs >1 female writers to be distinct and clear, so I renamed them appropriately.
+
+# I knew that I wanted to show the distinction between absence vs presence on winning vs nominated writing teams for the Tony Award for Best Musical, so I set the x axis to show nominated versus winning writing teams (1 count = 1 show = 1 writing team) 
+
+# I knew that a singular graphic would appear cluttered, so I decided to facet by decade, so I went into the code above and created a Decade column in each respective decade table. 
+
+# I wanted faceted bar graphs to show the relative number of writing teams with and without a female writer, so to show the respective counts, I tried geom_bar with position set equal to "dodge."
+
+# I noticed that the zero count of >1 female writer for some nominated and winning categories was dropped in some faceted plots. I wanted to make the zero count clear, so I used a line of code which I found on an online forum, the preserve = "single" command within the dodge position in geom_bar, to fix this.
+
+# Finally, in keeping with a good graphic, I added an axis label, title, subtitle, and legend title in labs().
 
 bm_all$Winner[bm_all$Winner==0] <- "Nominee"
 bm_all$Winner[bm_all$Winner==1] <- "Winner"
@@ -137,16 +159,13 @@ bm_all$Winner[bm_all$Winner==1] <- "Winner"
 bm_all$Women[bm_all$Women==0] <- "No Female Writers"
 bm_all$Women[bm_all$Women==1] <- "At Least 1 Female Writer"
 
-
-data <- bm_all
-
-ggplot(data, aes(x = as.character(Winner), fill = as.factor(Women))) +
+ggplot(bm_all, aes(x = Winner, fill = Women)) +
   geom_bar(position = position_dodge(preserve = "single")) +
   facet_wrap(. ~ Decade) +
   labs(x = "Tony Award Nominees/Winners",
        fill = "Writing Teams' Gender Composition",
        title = "Gender of Broadway Writers",
-       subtitle = "Shows up for Tony Award for Best Musical, 1949-1999")
+       subtitle = "Shows up for Tony Award for Best Musical, 1949-1999",
+       caption = "*Writing teams are comprised of book writers, lyricists, and/or composers*")
 
 ```
-
